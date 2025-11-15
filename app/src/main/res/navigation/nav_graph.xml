@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/categoriesFragment">
+
+    <fragment
+        android:id="@+id/categoriesFragment"
+        android:name="com.example.itrainer.ui.categories.CategoriesFragment"
+        android:label="Categorías">
+        <action
+            android:id="@+id/action_categoriesFragment_to_teamsFragment"
+            app:destination="@id/teamsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/teamsFragment"
+        android:name="com.example.itrainer.ui.teams.TeamsFragment"
+        android:label="Equipos">
+        <argument
+            android:name="categoryId"
+            app:argType="integer"
+            android:defaultValue="-1" />
+        <action
+            android:id="@+id/action_teamsFragment_to_distributionFragment"
+            app:destination="@id/distributionFragment" />
+        <action
+            android:id="@+id/action_teamsFragment_to_playersFragment"
+            app:destination="@id/playersFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/distributionFragment"
+        android:name="com.example.itrainer.ui.distribution.DistributionFragment"
+        android:label="Distribución">
+        <argument
+            android:name="teamId"
+            app:argType="integer" />
+        <argument
+            android:name="categoryId"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.example.itrainer.ui.history.HistoryFragment"
+        android:label="Histórico">
+        <action
+            android:id="@+id/action_historyFragment_to_distributionDetailsFragment"
+            app:destination="@id/distributionDetailsFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/distributionDetailsFragment"
+        android:name="com.example.itrainer.ui.distribution.DistributionDetailsFragment"
+        android:label="Detalles de distribución">
+        <argument
+            android:name="distributionId"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/playersFragment"
+        android:name="com.example.itrainer.ui.players.PlayersFragment"
+        android:label="Jugadores">
+        <argument
+            android:name="teamId"
+            app:argType="integer" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/rulesFragment"
+        android:name="com.example.itrainer.ui.rules.RulesFragment"
+        android:label="Reglas"
+        tools:layout="@layout/fragment_rules" />
+
+</navigation>

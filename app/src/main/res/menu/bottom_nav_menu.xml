@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/categoriesFragment"
+        android:icon="@drawable/ic_category"
+        android:title="Categorías" />
+
+    <item
+        android:id="@+id/teamsFragment"
+        android:icon="@drawable/ic_team"
+        android:title="Equipos" />
+
+    <item
+        android:id="@+id/distributionFragment"
+        android:icon="@drawable/ic_distribution"
+        android:title="Distribuir" />
+
+    <item
+        android:id="@+id/historyFragment"
+        android:icon="@drawable/ic_history"
+        android:title="Histórico" />
+    <item
+        android:id="@+id/rulesFragment"
+        android:icon="@drawable/ic_rules"
+        android:title="Reglas" />
+</menu>
