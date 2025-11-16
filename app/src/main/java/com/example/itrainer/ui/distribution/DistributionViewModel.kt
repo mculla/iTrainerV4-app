@@ -9,6 +9,7 @@ import com.example.itrainer.data.entities.Player
 import com.example.itrainer.data.entities.Team
 import com.example.itrainer.data.models.DistributionModel
 import com.example.itrainer.data.models.PlayerModel
+import com.example.itrainer.data.models.SubstitutionModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -123,7 +124,6 @@ class DistributionViewModel(
             val periodPlayers = currentDistribution[period]?.toMutableList() ?: mutableListOf()
             val player = playerDao.getPlayerById(playerId) ?: return@launch
 
-            // CORREGIDO: Usar playersPerPeriod de la categoría
             val maxPlayersPerPeriod = category?.playersPerPeriod ?: 5
             if (selected && periodPlayers.size >= maxPlayersPerPeriod) {
                 _maxPlayersReachedEvent.value = period
@@ -145,19 +145,17 @@ class DistributionViewModel(
     }
 
     fun isPeriodFull(period: Int): Boolean {
-        // CORREGIDO: Usar playersPerPeriod de la categoría
         val maxPlayersPerPeriod = category?.playersPerPeriod ?: 5
         return _distribution.value[period]?.size ?: 0 >= maxPlayersPerPeriod
     }
+
     fun toggleSubstitution(playerId: Int, period: Int, isOut: Boolean) {
-        val key = period * 1000 + playerId // Crear una key única
+        val key = period * 1000 + playerId
         val currentSubs = _substitutions.value.toMutableMap()
 
         if (isOut) {
-            // Marcar como sale (X)
             currentSubs[key] = SubstitutionInfo(playerId, isOut = true, isSubstitute = false)
         } else {
-            // Quitar marca de salida
             currentSubs.remove(key)
         }
 
@@ -185,6 +183,7 @@ class DistributionViewModel(
     fun isLastPeriod(period: Int): Boolean {
         return period == category?.periodsCount
     }
+
     private fun validateDistribution() {
         val messages = mutableListOf<String>()
         val cat = category ?: return
@@ -212,13 +211,11 @@ class DistributionViewModel(
             }
         }
 
-        // MEJORADO: Aplicar reglas específicas por categoría
         applySpecialRules(cat, allPlayers, playerPeriodCounts, messages)
 
         _validationMessages.value = messages
     }
 
-    // NUEVO MÉTODO: Reglas específicas por categoría
     private fun applySpecialRules(
         cat: Category,
         allPlayers: List<Player>,
@@ -227,7 +224,6 @@ class DistributionViewModel(
     ) {
         when (cat.name) {
             "Minibasket" -> {
-                // Regla específica para Minibasket con 8 jugadores
                 if (allPlayers.size == 8 && cat.periodsCount >= 5) {
                     val playersWithFourPeriods = playerPeriodCounts.filter { it.value >= 4 }
                     if (playersWithFourPeriods.isEmpty()) {
@@ -236,26 +232,14 @@ class DistributionViewModel(
                 }
             }
 
-            "Benjamín" -> {
-                // AÑADE AQUÍ LAS REGLAS ESPECÍFICAS PARA BENJAMÍN
-                // Ejemplo:
-                // if (allPlayers.size == 8) {
-                //     // Alguna validación específica
-                // }
-            }
-
             "Infantil y PreInf 2ª" -> {
-                // REGLA ESPECIAL: En los 3 primeros períodos todos deben jugar al menos 1
-                // y no pueden jugar más de 2
                 if (cat.periodsCount >= 3) {
-                    // Contar períodos en los primeros 3 períodos por jugador
                     val firstThreePeriods = _distribution.value.filterKeys { period -> period <= 3 }
                     val playerCountInFirstThree = firstThreePeriods.values
                         .flatten()
                         .groupingBy { player -> player }
                         .eachCount()
 
-                    // Validar que TODOS los jugadores disponibles juegan al menos 1 período en los 3 primeros
                     allPlayers.forEach { player ->
                         val periodsInFirstThree = playerCountInFirstThree[player] ?: 0
                         if (periodsInFirstThree == 0) {
@@ -267,12 +251,6 @@ class DistributionViewModel(
                     }
                 }
             }
-
-            "Cadete" -> {
-                // AÑADE AQUÍ LAS REGLAS ESPECÍFICAS PARA CADETE
-            }
-
-            // Añade más categorías según necesites
         }
     }
 
@@ -293,13 +271,24 @@ class DistributionViewModel(
         if (_validationMessages.value?.isNotEmpty() == true) return
 
         viewModelScope.launch {
+            // NUEVO: Convertir sustituciones a formato serializable
+            val substitutionsMap = _substitutions.value.map { (key, info) ->
+                key.toString() to SubstitutionModel(
+                    playerId = info.playerId,
+                    period = key / 1000,
+                    isOut = info.isOut,
+                    isSubstitute = info.isSubstitute
+                )
+            }.toMap()
+
             val distributionModel = DistributionModel(
                 periods = _distribution.value.mapValues { (_, players) ->
                     players.map { PlayerModel(it.id, it.name, it.number) }
                 },
                 date = System.currentTimeMillis(),
                 gameDate = gameDate,
-                opponent = opponent
+                opponent = opponent,
+                substitutions = substitutionsMap // NUEVO: Guardar las sustituciones
             )
 
             val distribution = GameDistribution(
@@ -329,8 +318,9 @@ class DistributionViewModel(
         }
     }
 }
+
 data class SubstitutionInfo(
     val playerId: Int,
-    val isOut: Boolean = false,  // true si sale (X)
-    val isSubstitute: Boolean = false     // true si es sustituto (verde)
+    val isOut: Boolean = false,
+    val isSubstitute: Boolean = false
 )

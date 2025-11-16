@@ -11,7 +11,8 @@ data class DistributionModel(
     val periods: Map<Int, List<PlayerModel>>,
     val date: Long,
     val gameDate: String,
-    val opponent: String
+    val opponent: String,
+    val substitutions: Map<String, SubstitutionModel> = emptyMap() // Nueva: información de sustituciones
 )
 
 @Serializable
@@ -21,3 +22,10 @@ data class PlayerModel(
     val number: Int
 )
 
+@Serializable
+data class SubstitutionModel(
+    val playerId: Int,
+    val period: Int,
+    val isOut: Boolean = false,      // true si sale (X roja)
+    val isSubstitute: Boolean = false // true si es cambio (verde)
+)

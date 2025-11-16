@@ -21,7 +21,7 @@ import com.example.itrainer.data.dao.TeamDao
         Player::class,
         GameDistribution::class
     ],
-    version = 4
+    version = 5
 )
 abstract class ITrainerDatabase : RoomDatabase() {
     abstract fun categoryDao(): CategoryDao
