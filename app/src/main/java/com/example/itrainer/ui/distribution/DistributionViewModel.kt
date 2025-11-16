@@ -163,17 +163,41 @@ class DistributionViewModel(
     }
 
     fun addSubstitute(playerId: Int, period: Int) {
-        val key = period * 1000 + playerId
-        val currentSubs = _substitutions.value.toMutableMap()
-        currentSubs[key] = SubstitutionInfo(playerId, isOut = false, isSubstitute = true)
-        _substitutions.value = currentSubs
+        viewModelScope.launch {
+            val key = period * 1000 + playerId
+            val currentSubs = _substitutions.value.toMutableMap()
+            currentSubs[key] = SubstitutionInfo(playerId, isOut = false, isSubstitute = true)
+            _substitutions.value = currentSubs
+
+            // NUEVO: Añadir el jugador a la distribución también
+            val player = playerDao.getPlayerById(playerId) ?: return@launch
+            val currentDistribution = _distribution.value.toMutableMap()
+            val periodPlayers = currentDistribution[period]?.toMutableList() ?: mutableListOf()
+
+            if (!periodPlayers.contains(player)) {
+                periodPlayers.add(player)
+                currentDistribution[period] = periodPlayers
+                _distribution.value = currentDistribution
+            }
+        }
     }
 
     fun removeSubstitute(playerId: Int, period: Int) {
-        val key = period * 1000 + playerId
-        val currentSubs = _substitutions.value.toMutableMap()
-        currentSubs.remove(key)
-        _substitutions.value = currentSubs
+        viewModelScope.launch {
+            val key = period * 1000 + playerId
+            val currentSubs = _substitutions.value.toMutableMap()
+            currentSubs.remove(key)
+            _substitutions.value = currentSubs
+
+            // NUEVO: Quitar el jugador de la distribución también
+            val player = playerDao.getPlayerById(playerId) ?: return@launch
+            val currentDistribution = _distribution.value.toMutableMap()
+            val periodPlayers = currentDistribution[period]?.toMutableList() ?: mutableListOf()
+
+            periodPlayers.remove(player)
+            currentDistribution[period] = periodPlayers
+            _distribution.value = currentDistribution
+        }
     }
 
     fun getSubstitutesCount(period: Int): Int {
