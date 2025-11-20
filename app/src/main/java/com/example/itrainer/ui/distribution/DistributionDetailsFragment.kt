@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.gridlayout.widget.GridLayout
@@ -14,6 +15,7 @@ import androidx.navigation.fragment.navArgs
 import com.example.itrainer.R
 import com.example.itrainer.data.entities.Player
 import com.example.itrainer.data.models.PlayerModel
+import com.example.itrainer.data.models.SubstitutionInfoModel
 import com.example.itrainer.databinding.FragmentDistributionDetailsBinding
 
 class DistributionDetailsFragment : Fragment() {
@@ -52,27 +54,31 @@ class DistributionDetailsFragment : Fragment() {
         // Mostrar información del partido
         binding.gameInfo.text = "Partido vs ${details.opponent} (${details.gameDate})"
 
+        val periodsCount = details.periodsCount
+
         // Configurar cabecera de períodos
         binding.periodHeader.removeAllViews()
-        // Añadir celda vacía para alinear con nombres
         addHeaderCell("")
-        // Añadir períodos
-        for (period in 1..6) {
+        for (period in 1..periodsCount) {
             addHeaderCell("P$period")
         }
 
         // Configurar grid
         binding.distributionGrid.apply {
             removeAllViews()
-            columnCount = 7 // 1 para nombre + 6 períodos
+            columnCount = periodsCount + 1
             rowCount = details.players.size
 
             details.players.forEach { player ->
-                // Añadir nombre del jugador
                 addPlayerCell(player)
-                // Añadir celdas de período
-                for (period in 1..6) {
-                    addPeriodCell(player, period, details.distribution[period] ?: emptyList())
+                for (period in 1..periodsCount) {
+                    addPeriodCell(
+                        player,
+                        period,
+                        details.distribution[period] ?: emptyList(),
+                        details.substitutions,
+                        period == periodsCount && details.categoryId == 2 // Es último período de infantil
+                    )
                 }
             }
         }
@@ -108,7 +114,17 @@ class DistributionDetailsFragment : Fragment() {
         }
     }
 
-    private fun addPeriodCell(player: Player, period: Int, periodPlayers: List<PlayerModel>) {
+    private fun addPeriodCell(
+        player: Player,
+        period: Int,
+        periodPlayers: List<PlayerModel>,
+        substitutions: Map<String, SubstitutionInfoModel>?,
+        isLastPeriod: Boolean
+    ) {
+        val isPlayerInPeriod = periodPlayers.any { it.id == player.id }
+        val key = "${period * 1000 + player.id}"
+        val substitutionInfo = substitutions?.get(key)
+
         TextView(requireContext()).apply {
             layoutParams = GridLayout.LayoutParams().apply {
                 width = 48.dpToPx()
@@ -116,8 +132,36 @@ class DistributionDetailsFragment : Fragment() {
                 columnSpec = GridLayout.spec(period, 1)
             }
             gravity = Gravity.CENTER
-            setBackgroundResource(R.drawable.period_cell_background)
-            text = if (periodPlayers.any { it.id == player.id }) "✓" else ""
+
+            // Determinar el color de fondo y el texto
+            when {
+                substitutionInfo?.isOut == true && isPlayerInPeriod -> {
+                    // Jugador TITULAR que SALE (X roja con fondo azul)
+                    setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary))
+                    text = "X"
+                    setTextColor(ContextCompat.getColor(requireContext(), android.R.color.holo_red_dark))
+                    textSize = 24f
+                    setTypeface(null, android.graphics.Typeface.BOLD)
+                }
+                substitutionInfo?.isSubstitute == true -> {
+                    // Sustituto que ENTRA (fondo verde)
+                    setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.substitute_green))
+                    text = "✓"
+                    setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+                }
+                isPlayerInPeriod -> {
+                    // Jugador titular normal (fondo azul)
+                    setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.colorPrimary))
+                    text = "✓"
+                    setTextColor(ContextCompat.getColor(requireContext(), android.R.color.white))
+                }
+                else -> {
+                    // No juega
+                    setBackgroundResource(R.drawable.period_cell_background)
+                    text = ""
+                }
+            }
+
             binding.distributionGrid.addView(this)
         }
     }

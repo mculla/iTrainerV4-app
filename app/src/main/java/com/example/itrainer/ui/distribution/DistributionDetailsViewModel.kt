@@ -11,6 +11,7 @@ import com.example.itrainer.data.database.ITrainerDatabase
 import com.example.itrainer.data.entities.Player
 import com.example.itrainer.data.models.DistributionModel
 import com.example.itrainer.data.models.PlayerModel
+import com.example.itrainer.data.models.SubstitutionInfoModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -26,7 +27,10 @@ class DistributionDetailsViewModel(
         val gameDate: String,
         val opponent: String,
         val players: List<Player>,
-        val distribution: Map<Int, List<PlayerModel>>
+        val distribution: Map<Int, List<PlayerModel>>,
+        val substitutions: Map<String, SubstitutionInfoModel>?,
+        val categoryId: Int?,
+        val periodsCount: Int
     )
 
     private val _distributionDetails = MutableLiveData<DistributionDetails>()
@@ -43,11 +47,17 @@ class DistributionDetailsViewModel(
                 val distributionModel = json.decodeFromString<DistributionModel>(it.distributionJson)
                 val players = database.playerDao().getPlayersByTeam(it.teamId)
 
+                // Determinar el número de períodos desde la distribución
+                val periodsCount = distributionModel.periods.keys.maxOrNull() ?: 6
+
                 _distributionDetails.value = DistributionDetails(
                     gameDate = it.gameDate,
                     opponent = it.opponent,
                     players = players,
-                    distribution = distributionModel.periods
+                    distribution = distributionModel.periods,
+                    substitutions = distributionModel.substitutions,
+                    categoryId = distributionModel.categoryId,
+                    periodsCount = periodsCount
                 )
             }
         }
