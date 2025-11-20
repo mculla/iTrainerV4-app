@@ -3,11 +3,14 @@ package com.example.itrainer.ui.categories
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.itrainer.R
 import com.example.itrainer.data.entities.Category
 import com.example.itrainer.databinding.ItemCategoryBinding
+import com.example.itrainer.utils.CategoryColors
 
 class CategoriesAdapter(
     private val onCategoryClick: (Category) -> Unit
@@ -26,14 +29,33 @@ class CategoriesAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(category: Category, onCategoryClick: (Category) -> Unit) {
-            binding.categoryName.text = category.name
-            binding.categoryDetails.text = buildCategoryDetails(category)
-            binding.root.setOnClickListener { onCategoryClick(category) }
+            binding.apply {
+                categoryChip.text = category.name.uppercase()
+                categoryDetails.text = buildCategoryDetails(category)
+                categoryPeriodInfo.text = buildPeriodInfo(category)
+
+                // Usar la utilidad de colores
+                val categoryColor = CategoryColors.getCategoryColor(category.name)
+                categoryColorBar.setBackgroundColor(
+                    ContextCompat.getColor(root.context, categoryColor)
+                )
+                categoryChip.setBackgroundColor(
+                    ContextCompat.getColor(root.context, categoryColor)
+                )
+
+                root.setOnClickListener { onCategoryClick(category) }
+            }
         }
 
         private fun buildCategoryDetails(category: Category): String {
             return "${category.periodsCount} períodos - " +
-                    "${category.minPlayers}-${category.maxPlayers} jugadores"
+                    "${category.minPlayers}-${category.maxPlayers} jugadores - " +
+                    "${category.playersPerPeriod} en cancha"
+        }
+
+        private fun buildPeriodInfo(category: Category): String {
+            return "Min: ${category.minPeriodsPerPlayer} períodos/jugador - " +
+                    "Max: ${category.maxPeriodsPerPlayer} períodos/jugador"
         }
 
         companion object {

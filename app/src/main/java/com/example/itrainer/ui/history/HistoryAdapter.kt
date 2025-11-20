@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.itrainer.R
 import com.example.itrainer.data.models.GameDistributionWithTeam
 import com.example.itrainer.databinding.ItemHistoryBinding
+import com.example.itrainer.utils.CategoryColors
 
 class HistoryAdapter(
     private val onDistributionClick: (GameDistributionWithTeam) -> Unit,
@@ -40,30 +41,20 @@ class HistoryAdapter(
             val category = distributionWithTeam.category
 
             binding.apply {
-                // Nombre de la categoría
                 categoryChip.text = category?.name?.uppercase() ?: "SIN CATEGORÍA"
-
-                // Nombre del equipo
                 teamName.text = team.name
-
-                // Fecha del partido
                 gameDate.text = distribution.gameDate
-
-                // Rival
                 opponent.text = "vs ${distribution.opponent}"
 
-                // Color según la categoría
-                val categoryColor = getCategoryColor(category?.name)
+                // Usar la utilidad de colores
+                val categoryColor = CategoryColors.getCategoryColor(category?.name)
                 categoryColorBar.setBackgroundColor(
                     ContextCompat.getColor(root.context, categoryColor)
                 )
-
-                // Cambiar también el color del chip
                 categoryChip.setBackgroundColor(
                     ContextCompat.getColor(root.context, categoryColor)
                 )
 
-                // Click listeners
                 root.setOnClickListener { onDistributionClick(distributionWithTeam) }
                 root.setOnLongClickListener { onDistributionLongClick(distributionWithTeam) }
             }
