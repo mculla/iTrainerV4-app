@@ -6,16 +6,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/teamTitle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/headerLayout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_margin="16dp"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:text="Jugadores - Real Madrid" />
+        android:gravity="center_vertical"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TextView
+            android:id="@+id/teamTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            tools:text="Jugadores - Real Madrid" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/statsButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Estadísticas"
+            style="@style/Widget.MaterialComponents.Button.TextButton"/>
+
+    </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/playersRecyclerView"
@@ -25,7 +41,7 @@
         android:clipToPadding="false"
         android:padding="8dp"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        app:layout_constraintTop_toBottomOf="@id/teamTitle"
+        app:layout_constraintTop_toBottomOf="@id/headerLayout"
         app:layout_constraintBottom_toBottomOf="parent"
         tools:listitem="@layout/item_player" />
 
@@ -52,4 +68,3 @@
         app:layout_constraintEnd_toEndOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

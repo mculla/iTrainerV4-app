@@ -13,6 +13,7 @@ import com.example.itrainer.data.dao.PlayerDao
 import com.example.itrainer.data.dao.*
 
 import com.example.itrainer.data.dao.TeamDao
+import com.example.itrainer.data.entities.PlayerStats
 
 @Database(
     entities = [

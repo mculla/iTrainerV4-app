@@ -17,6 +17,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.encodeToString
 import java.util.Date
+import java.util.Calendar
 
 class DistributionViewModel(
     application: Application,
@@ -324,34 +325,31 @@ class DistributionViewModel(
 
             database.gameDistributionDao().insertDistribution(distribution)
 
-            // NUEVO: Actualizar estadísticas
+            // Actualizar estadísticas
             updatePlayerStatistics()
 
             _saveComplete.value = true
         }
     }
+
     private suspend fun updatePlayerStatistics() {
-        val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+        val currentYear = Calendar.getInstance().get(Calendar.YEAR)
         val playerStatsDao = database.playerStatsDao()
 
         _distribution.value.values.flatten().distinct().forEach { player ->
-            // Obtener estadísticas actuales del jugador
             var stats = playerStatsDao.getPlayerStats(player.id, currentYear)
 
             if (stats == null) {
-                // Crear nuevas estadísticas si no existen
                 stats = PlayerStats(
                     playerId = player.id,
                     seasonYear = currentYear
                 )
             }
 
-            // Contar períodos jugados en este partido
             val periodsPlayed = _distribution.value.values.count { players ->
                 players.any { it.id == player.id }
             }
 
-            // Actualizar estadísticas
             val updatedStats = stats.copy(
                 totalGames = stats.totalGames + 1,
                 totalPeriods = stats.totalPeriods + periodsPlayed,

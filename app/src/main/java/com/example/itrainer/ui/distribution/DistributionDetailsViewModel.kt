@@ -11,7 +11,6 @@ import com.example.itrainer.data.database.ITrainerDatabase
 import com.example.itrainer.data.entities.Player
 import com.example.itrainer.data.models.DistributionModel
 import com.example.itrainer.data.models.PlayerModel
-import com.example.itrainer.data.models.SubstitutionModel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
@@ -27,8 +26,7 @@ class DistributionDetailsViewModel(
         val gameDate: String,
         val opponent: String,
         val players: List<Player>,
-        val distribution: Map<Int, List<PlayerModel>>,
-        val substitutions: Map<String, SubstitutionModel> = emptyMap() // NUEVO
+        val distribution: Map<Int, List<PlayerModel>>
     )
 
     private val _distributionDetails = MutableLiveData<DistributionDetails>()
@@ -49,8 +47,7 @@ class DistributionDetailsViewModel(
                     gameDate = it.gameDate,
                     opponent = it.opponent,
                     players = players,
-                    distribution = distributionModel.periods,
-                    substitutions = distributionModel.substitutions // NUEVO: Cargar las sustituciones
+                    distribution = distributionModel.periods
                 )
             }
         }

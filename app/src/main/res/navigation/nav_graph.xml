@@ -28,9 +28,6 @@
         <action
             android:id="@+id/action_teamsFragment_to_playersFragment"
             app:destination="@id/playersFragment" />
-        <action
-            android:id="@+id/action_teamsFragment_to_playerStatsFragment"
-            app:destination="@id/playerStatsFragment" />
     </fragment>
 
     <fragment
@@ -67,6 +64,19 @@
         android:id="@+id/playersFragment"
         android:name="com.example.itrainer.ui.players.PlayersFragment"
         android:label="Jugadores">
+        <argument
+            android:name="teamId"
+            app:argType="integer" />
+        <action
+            android:id="@+id/action_playersFragment_to_playerStatsFragment"
+            app:destination="@id/playerStatsFragment" />
+    </fragment>
+
+    <!-- AÑADE ESTE FRAGMENTO -->
+    <fragment
+        android:id="@+id/playerStatsFragment"
+        android:name="com.example.itrainer.ui.stats.PlayerStatsFragment"
+        android:label="Estadísticas de Jugadores">
         <argument
             android:name="teamId"
             app:argType="integer" />

@@ -6,10 +6,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import com.example.itrainer.R
 import com.example.itrainer.databinding.FragmentPlayersBinding
 import com.example.itrainer.databinding.DialogAddPlayerBinding
 import com.example.itrainer.data.entities.Player
@@ -41,17 +44,6 @@ class PlayersFragment : Fragment() {
         setupFab()
         setupStatsButton()
         observeViewModel()
-
-
-
-        private fun navigateToStats() {
-            val bundle = Bundle().apply {
-                putInt("teamId", args.teamId)
-            }
-            findNavController().navigate(R.id.playerStatsFragment, bundle)
-        }
-
-        observeViewModel()
     }
 
     private fun setupRecyclerView() {
@@ -76,13 +68,14 @@ class PlayersFragment : Fragment() {
             showAddPlayerDialog()
         }
     }
+
     private fun setupStatsButton() {
         binding.statsButton.setOnClickListener {
-            val bundle = Bundle().apply {
-                putInt("teamId", args.teamId)
-            }
+            val bundle = bundleOf("teamId" to args.teamId)
             findNavController().navigate(R.id.playerStatsFragment, bundle)
         }
+    }
+
     private fun observeViewModel() {
         viewModel.players.observe(viewLifecycleOwner) { players ->
             playersAdapter.submitList(players)
@@ -179,10 +172,6 @@ class PlayersFragment : Fragment() {
             }
             .setNegativeButton("Cancelar", null)
             .show()
-    }
-
-    private fun updateDialogPositiveButton(dialog: AlertDialog, enabled: Boolean) {
-        dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.isEnabled = enabled
     }
 
     override fun onDestroyView() {
