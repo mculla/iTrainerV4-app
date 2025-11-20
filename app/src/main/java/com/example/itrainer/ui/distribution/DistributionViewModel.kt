@@ -6,10 +6,11 @@ import com.example.itrainer.data.database.ITrainerDatabase
 import com.example.itrainer.data.entities.Category
 import com.example.itrainer.data.entities.GameDistribution
 import com.example.itrainer.data.entities.Player
+import com.example.itrainer.data.entities.PlayerStats
 import com.example.itrainer.data.entities.Team
 import com.example.itrainer.data.models.DistributionModel
 import com.example.itrainer.data.models.PlayerModel
-import com.example.itrainer.data.models.SubstitutionModel
+import com.example.itrainer.data.models.SubstitutionInfoModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -295,16 +296,6 @@ class DistributionViewModel(
         if (_validationMessages.value?.isNotEmpty() == true) return
 
         viewModelScope.launch {
-            // NUEVO: Convertir sustituciones a formato serializable
-            val substitutionsMap = _substitutions.value.map { (key, info) ->
-                key.toString() to SubstitutionModel(
-                    playerId = info.playerId,
-                    period = key / 1000,
-                    isOut = info.isOut,
-                    isSubstitute = info.isSubstitute
-                )
-            }.toMap()
-
             val distributionModel = DistributionModel(
                 periods = _distribution.value.mapValues { (_, players) ->
                     players.map { PlayerModel(it.id, it.name, it.number) }
@@ -312,7 +303,15 @@ class DistributionViewModel(
                 date = System.currentTimeMillis(),
                 gameDate = gameDate,
                 opponent = opponent,
-                substitutions = substitutionsMap // NUEVO: Guardar las sustituciones
+                categoryId = categoryId,
+                substitutions = _substitutions.value.mapKeys { it.key.toString() }
+                    .mapValues { entry ->
+                        SubstitutionInfoModel(
+                            playerId = entry.value.playerId,
+                            isOut = entry.value.isOut,
+                            isSubstitute = entry.value.isSubstitute
+                        )
+                    }
             )
 
             val distribution = GameDistribution(
@@ -324,10 +323,44 @@ class DistributionViewModel(
             )
 
             database.gameDistributionDao().insertDistribution(distribution)
+
+            // NUEVO: Actualizar estadísticas
+            updatePlayerStatistics()
+
             _saveComplete.value = true
         }
     }
+    private suspend fun updatePlayerStatistics() {
+        val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+        val playerStatsDao = database.playerStatsDao()
 
+        _distribution.value.values.flatten().distinct().forEach { player ->
+            // Obtener estadísticas actuales del jugador
+            var stats = playerStatsDao.getPlayerStats(player.id, currentYear)
+
+            if (stats == null) {
+                // Crear nuevas estadísticas si no existen
+                stats = PlayerStats(
+                    playerId = player.id,
+                    seasonYear = currentYear
+                )
+            }
+
+            // Contar períodos jugados en este partido
+            val periodsPlayed = _distribution.value.values.count { players ->
+                players.any { it.id == player.id }
+            }
+
+            // Actualizar estadísticas
+            val updatedStats = stats.copy(
+                totalGames = stats.totalGames + 1,
+                totalPeriods = stats.totalPeriods + periodsPlayed,
+                averagePeriodsPerGame = (stats.totalPeriods + periodsPlayed).toFloat() / (stats.totalGames + 1)
+            )
+
+            playerStatsDao.insertStats(updatedStats)
+        }
+    }
     class Factory(
         private val application: Application,
         private val teamId: Int,

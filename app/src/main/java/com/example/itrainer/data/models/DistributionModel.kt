@@ -2,9 +2,6 @@
 package com.example.itrainer.data.models
 
 import kotlinx.serialization.Serializable
-import java.util.Date
-import com.example.itrainer.data.entities.GameDistribution
-import com.example.itrainer.data.entities.Team
 
 @Serializable
 data class DistributionModel(
@@ -12,7 +9,8 @@ data class DistributionModel(
     val date: Long,
     val gameDate: String,
     val opponent: String,
-    val substitutions: Map<String, SubstitutionModel> = emptyMap() // Nueva: información de sustituciones
+    val categoryId: Int,
+    val substitutions: Map<String, SubstitutionInfoModel>? = null // Para guardar sustituciones
 )
 
 @Serializable
@@ -23,9 +21,8 @@ data class PlayerModel(
 )
 
 @Serializable
-data class SubstitutionModel(
+data class SubstitutionInfoModel( // NUEVO: Modelo serializable
     val playerId: Int,
-    val period: Int,
-    val isOut: Boolean = false,      // true si sale (X roja)
-    val isSubstitute: Boolean = false // true si es cambio (verde)
+    val isOut: Boolean = false,
+    val isSubstitute: Boolean = false
 )

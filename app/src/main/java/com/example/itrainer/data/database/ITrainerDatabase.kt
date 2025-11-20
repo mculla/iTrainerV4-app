@@ -19,15 +19,17 @@ import com.example.itrainer.data.dao.TeamDao
         Category::class,
         Team::class,
         Player::class,
-        GameDistribution::class
+        GameDistribution::class,
+        PlayerStats::class // AÑADIR ESTA LÍNEA
     ],
-    version = 5
+    version = 6
 )
 abstract class ITrainerDatabase : RoomDatabase() {
     abstract fun categoryDao(): CategoryDao
     abstract fun teamDao(): TeamDao
     abstract fun playerDao(): PlayerDao
     abstract fun gameDistributionDao(): GameDistributionDao
+    abstract fun playerStatsDao(): PlayerStatsDao // AÑADIR ESTA LÍNEA
 
     companion object {
         @Volatile

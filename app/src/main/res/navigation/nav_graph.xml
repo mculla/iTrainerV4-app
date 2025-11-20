@@ -28,6 +28,9 @@
         <action
             android:id="@+id/action_teamsFragment_to_playersFragment"
             app:destination="@id/playersFragment" />
+        <action
+            android:id="@+id/action_teamsFragment_to_playerStatsFragment"
+            app:destination="@id/playerStatsFragment" />
     </fragment>
 
     <fragment

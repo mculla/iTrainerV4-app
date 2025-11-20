@@ -39,6 +39,18 @@ class PlayersFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setupFab()
+        setupStatsButton()
+        observeViewModel()
+
+
+
+        private fun navigateToStats() {
+            val bundle = Bundle().apply {
+                putInt("teamId", args.teamId)
+            }
+            findNavController().navigate(R.id.playerStatsFragment, bundle)
+        }
+
         observeViewModel()
     }
 
@@ -64,7 +76,13 @@ class PlayersFragment : Fragment() {
             showAddPlayerDialog()
         }
     }
-
+    private fun setupStatsButton() {
+        binding.statsButton.setOnClickListener {
+            val bundle = Bundle().apply {
+                putInt("teamId", args.teamId)
+            }
+            findNavController().navigate(R.id.playerStatsFragment, bundle)
+        }
     private fun observeViewModel() {
         viewModel.players.observe(viewLifecycleOwner) { players ->
             playersAdapter.submitList(players)
