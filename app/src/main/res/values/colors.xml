@@ -12,4 +12,10 @@
     <color name="colorAccent">#03A9F4</color>
     <color name="substitute_green">#4CAF50</color> <!-- NUEVO: Verde para sustitutos -->
 
+    <!-- AÑADIR: Colores para categorías -->
+    <color name="category_minibasket">#FF9800</color>      <!-- Naranja -->
+    <color name="category_benjamin">#4CAF50</color>        <!-- Verde -->
+    <color name="category_infantil">#2196F3</color>        <!-- Azul -->
+    <color name="category_cadete">#9C27B0</color>          <!-- Morado -->
+    <color name="category_default">#607D8B</color>         <!-- Gris -->
 </resources>

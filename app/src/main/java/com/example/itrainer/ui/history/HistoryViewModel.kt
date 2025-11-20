@@ -18,6 +18,7 @@ class HistoryViewModel(
     private val database = ITrainerDatabase.getDatabase(application)
     private val gameDistributionDao = database.gameDistributionDao()
     private val teamDao = database.teamDao()
+    private val categoryDao = database.categoryDao()
 
     private val json = Json {
         ignoreUnknownKeys = true
@@ -34,9 +35,15 @@ class HistoryViewModel(
     fun loadDistributions() {
         viewModelScope.launch {
             val allDistributions = gameDistributionDao.getAllDistributions()
-            val distributionsWithTeams = allDistributions.map { distribution ->
+            val distributionsWithTeams = allDistributions.mapNotNull { distribution ->
                 val team = teamDao.getTeamById(distribution.teamId)
-                GameDistributionWithTeam(distribution, team!!)
+                val category = team?.let { categoryDao.getCategoryById(it.categoryId) }
+
+                if (team != null) {
+                    GameDistributionWithTeam(distribution, team, category)
+                } else {
+                    null
+                }
             }
             _distributions.value = distributionsWithTeams
         }
@@ -47,6 +54,7 @@ class HistoryViewModel(
             distribution.distributionJson
         )
     }
+
     fun deleteDistribution(distribution: GameDistribution) {
         viewModelScope.launch {
             gameDistributionDao.deleteDistribution(distribution)
